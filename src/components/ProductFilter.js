@@ -1,42 +1,54 @@
 import React, { useContext, useEffect, useState } from 'react';
+import CategorySelect from './CategorySelect';
+import ProductsContext from '../context/Products';
 
-import CategoriesContext from '../context/Categories';
+function ProductFilter() {
+  const { onFilterProducts } = useContext(ProductsContext);
 
-function ProductFilter({ onSetFilter }) {
-  const [category, setCategory] = useState('');
-  const [priceRange, setPriceRange] = useState([]);
-
-  const { categories } = useContext(CategoriesContext);
+  const [formData, setFormData] = useState({
+    category: '',
+    priceRange: '',
+  });
 
   useEffect(() => {
-    onSetFilter({ category, priceRange });
-  }, [category, priceRange]);
+    const { category, priceRange } = formData;
 
-  const handlePriceRange = e => {
-    const value = e.target.value;
+    onFilterProducts({
+      category,
+      priceRange: handlePriceRange(priceRange),
+    });
+  }, [formData.category, formData.priceRange]);
 
-    setPriceRange(value.split('-').map(Number));
+  const handlePriceRange = priceRangePicked => {
+    return !priceRangePicked
+      ? priceRangePicked
+      : priceRangePicked.split('-').map(Number);
+  };
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   return (
     <div>
-      <h1>Filter by price and category</h1>
-      <div style={{ display: 'flex', gap: '20px' }}>
-        Catégorie :
-        <select onChange={e => setCategory(e.target.value)}>
-          <option value=''>All</option>
-          {categories.map(category => (
-            <option value={category}>{category}</option>
-          ))}
-        </select>
-        Price :
-        <select onChange={handlePriceRange}>
-          <option value=''>All</option>
-          <option value='0-10'>0 - 10€</option>
-          <option value='10-100'>10 - 100€</option>
-          <option value='100-1000'>100 - 1000€</option>
-        </select>
-      </div>
+      <h2>Filter by price/category</h2>
+      <CategorySelect onCategoryChange={handleChange} formData={formData} />
+      Price :{' '}
+      <select
+        name='priceRange'
+        value={formData.priceRange}
+        onChange={handleChange}
+      >
+        <option value=''>--Choose a price--</option>
+        <option value='0-100'>0-100</option>
+        <option value='100-200'>100-200</option>
+        <option value='200-500'>200-500</option>
+      </select>
     </div>
   );
 }

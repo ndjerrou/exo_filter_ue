@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-import ProductsContext from '../context/Products';
+import React, { useState, useContext, useEffect } from 'react';
+
 import CategoriesContext from '../context/Categories';
+import ProductsContext from '../context/Products';
+import CategorySelect from './CategorySelect';
 
 function ProductAdd() {
-  const { addProduct } = useContext(ProductsContext);
-  const { categories } = useContext(CategoriesContext);
+  const { fetchCategories, categories } = useContext(CategoriesContext);
+  const { onAddProduct } = useContext(ProductsContext);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -12,12 +14,19 @@ function ProductAdd() {
     category: '',
   });
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   const handleChange = e =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = e => {
     e.preventDefault();
-    addProduct(formData);
+
+    //@FIX : horrible !!!
+    onAddProduct({ ...formData, id: Math.random() });
+
     setFormData({
       title: '',
       price: '',
@@ -45,13 +54,8 @@ function ProductAdd() {
           value={formData.price}
           onChange={handleChange}
         />
-        Catégorie{' '}
-        <select>
-          {categories.map(category => (
-            <option value={category}>{category}</option>
-          ))}
-        </select>
-        <button type='submit'>Add Product</button>
+        <CategorySelect onCategoryChange={handleChange} formData={formData} />
+        <button disabled={!formData.category}>Add Product</button>
       </form>
     </div>
   );

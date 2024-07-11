@@ -1,25 +1,36 @@
 import axios from 'axios';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
 const CategoriesContext = createContext();
-
-export default CategoriesContext;
 
 export const CategoriesProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
 
   const fetchCategories = async () => {
-    const res = await axios('https://fakestoreapi.com/products/categories');
-    setCategories(res.data);
+    try {
+      const { data: categories } = await axios(
+        'https://fakestoreapi.com/products/categories?limit=4'
+      );
+
+      setCategories(categories);
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  fetchCategories();
 
   return (
-    <CategoriesContext.Provider value={{ fetchCategories, categories }}>
+    <CategoriesContext.Provider
+      value={{
+        categories,
+        fetchCategories,
+        setCategories,
+      }}
+    >
       {children}
     </CategoriesContext.Provider>
   );
 };
+
+export default CategoriesContext;
